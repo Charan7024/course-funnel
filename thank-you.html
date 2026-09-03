@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Watch Now | The $100/Day System</title>
+<meta name="robots" content="noindex" />
+<style>
+  :root {
+    --bg: #050607;
+    --panel: #0e1113;
+    --teal: #22D3EE;
+    --gold: #D4AF6A;
+    --white: #FFFFFF;
+    --light: #D7E4E6;
+    --muted: #8A9A9C;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 70px;
+    text-align: center;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 28px;
+  }
+  h1 span { color: var(--teal); }
+
+  .video-wrap {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%;
+    background: #000;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 30px;
+    border: 1px solid rgba(34, 211, 238, 0.2);
+  }
+  .video-wrap iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: 0;
+  }
+
+  .prompt {
+    font-size: 16px;
+    color: var(--light);
+    margin-bottom: 24px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .prompt b { color: var(--teal); }
+
+  #waitlist-btn {
+    display: inline-block;
+    background: var(--teal);
+    color: #06282c;
+    border: none;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 16px 36px;
+    font-size: 16.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  #waitlist-btn:hover { opacity: 0.9; }
+  #waitlist-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .confirm {
+    display: none;
+    margin-top: 4px;
+    padding: 18px 24px;
+    background: rgba(34, 211, 238, 0.08);
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    border-radius: 10px;
+    font-size: 15.5px;
+    color: var(--teal);
+    font-weight: 600;
+  }
+  .error {
+    display: none;
+    margin-top: 14px;
+    font-size: 14px;
+    color: #F87171;
+  }
+
+  footer {
+    margin-top: 48px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="badge"><span class="badge-dot"></span>You're In</div>
+    <h1>The <span>$100/Day</span> System, Full Breakdown</h1>
+
+    <div class="video-wrap">
+      <iframe
+        src="https://www.youtube.com/embed/YKkArGq_HgU"
+        title="The $100/Day System"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <p class="prompt">
+      Once you've watched the video, if you want to go deeper, I put together a
+      <b>free 5-part course</b> walking through exactly how to build each piece of this system.
+    </p>
+
+    <button id="waitlist-btn">Join The Waitlist For The Free Course</button>
+    <div class="confirm" id="confirm">You're on the list! I'll email you the moment it's ready.</div>
+    <div class="error" id="error"></div>
+
+    <footer>PostDailyAI &middot; Kadam Sai Charan</footer>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get('email');
+    const btn = document.getElementById('waitlist-btn');
+    const confirmEl = document.getElementById('confirm');
+    const errorEl = document.getElementById('error');
+
+    btn.addEventListener('click', async () => {
+      if (!email) {
+        errorEl.textContent = "We couldn't find your email. Please go back and sign up again.";
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Adding you...';
+      errorEl.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/join-waitlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          btn.style.display = 'none';
+          confirmEl.style.display = 'block';
+        } else {
+          errorEl.textContent = data.error || 'Something went wrong. Please try again.';
+          errorEl.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Join The Waitlist For The Free Course';
+        }
+      } catch (err) {
+        errorEl.textContent = 'Something went wrong. Please try again.';
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Join The Waitlist For The Free Course';
+      }
+    });
+  </script>
+</body>
+</html>
